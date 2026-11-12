@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "941673621702",
+    "firebase_url": "https://nh-movie-13248-default-rtdb.firebaseio.com",
+    "project_id": "nh-movie-13248",
+    "storage_bucket": "nh-movie-13248.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941673621702:android:d50857c318229cefadcfc7",
+        "android_client_info": {
+          "package_name": "com.moviebox.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC29AMddRUPyaDVJqImEv8onf9WEZhVZpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

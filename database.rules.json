@@ -1,0 +1,104 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "adminDevices": {
+      ".read": "auth != null",
+      "e029f5624b252c8d": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('deviceId').val() === 'e029f5624b252c8d' || root.child('adminRoles').child(auth.uid).val() === true)"
+      }
+    },
+
+    "config": {
+      ".read": true,
+      ".write": "auth != null && (root.child('adminRoles').child(auth.uid).val() === true || root.child('users').child(auth.uid).child('deviceId').val() === 'e029f5624b252c8d' || root.child('adminDevices').child('e029f5624b252c8d').val() === auth.uid)"
+    },
+
+    "shareCodes": {
+      ".read": true,
+      "$code": {
+        ".write": "auth != null"
+      }
+    },
+
+    "movieRequests": {
+      ".read": true,
+      "$requestId": {
+        ".write": "auth != null"
+      }
+    },
+
+    "mediaAnalytics": {
+      ".read": true,
+      "$itemId": {
+        ".write": "auth != null"
+      }
+    },
+
+    "appUpdate": {
+      ".read": true,
+      ".write": "auth != null && (root.child('adminRoles').child(auth.uid).val() === true || root.child('users').child(auth.uid).child('deviceId').val() === 'e029f5624b252c8d' || root.child('adminDevices').child('e029f5624b252c8d').val() === auth.uid)"
+    },
+
+    "notifications": {
+      ".read": true,
+      ".write": "auth != null && (root.child('adminRoles').child(auth.uid).val() === true || root.child('users').child(auth.uid).child('deviceId').val() === 'e029f5624b252c8d' || root.child('adminDevices').child('e029f5624b252c8d').val() === auth.uid)"
+    },
+
+    "metadata": {
+      "lastUpdated": {
+        ".read": true,
+        ".write": "auth != null && (root.child('adminRoles').child(auth.uid).val() === true || root.child('users').child(auth.uid).child('deviceId').val() === 'e029f5624b252c8d' || root.child('adminDevices').child('e029f5624b252c8d').val() === auth.uid)"
+      }
+    },
+
+    "categories": {
+      ".read": true,
+      "$categoryId": {
+        ".write": "auth != null && (root.child('adminRoles').child(auth.uid).val() === true || root.child('users').child(auth.uid).child('deviceId').val() === 'e029f5624b252c8d' || root.child('adminDevices').child('e029f5624b252c8d').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['id', 'name', 'type', 'active']) && (newData.child('type').val() === 'MOVIE' || newData.child('type').val() === 'SERIES' || newData.child('type').val() === 'BOTH')"
+      }
+    },
+
+    "movies": {
+      ".read": true,
+      ".indexOn": ["published", "categoryId", "tmdbId", "createdAt", "normalizedTitle"],
+      "$movieId": {
+        ".write": "auth != null && (root.child('adminRoles').child(auth.uid).val() === true || root.child('users').child(auth.uid).child('deviceId').val() === 'e029f5624b252c8d' || root.child('adminDevices').child('e029f5624b252c8d').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['id', 'title', 'mediaType', 'published', 'createdAt', 'updatedAt'])"
+      }
+    },
+
+    "webseries": {
+      ".read": true,
+      ".indexOn": ["published", "categoryId", "tmdbId", "createdAt", "normalizedTitle"],
+      "$seriesId": {
+        ".write": "auth != null && (root.child('adminRoles').child(auth.uid).val() === true || root.child('users').child(auth.uid).child('deviceId').val() === 'e029f5624b252c8d' || root.child('adminDevices').child('e029f5624b252c8d').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['id', 'title', 'mediaType', 'published', 'createdAt', 'updatedAt'])"
+      }
+    },
+
+    "users": {
+      ".read": "auth != null",
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+
+    "userLists": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "adminRoles": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('deviceId').val() === 'e029f5624b252c8d' || root.child('adminDevices').child('e029f5624b252c8d').val() === auth.uid)"
+      }
+    }
+  }
+}

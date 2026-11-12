@@ -1,0 +1,85 @@
+name: Build MovieBox Android APK
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read build settings
+        run: |
+          BT=debug
+          if [ -f .github/nh-build.env ]; then
+            v=$(grep -E '^BUILD_TYPE=' .github/nh-build.env | head -1 | cut -d= -f2 | tr -d '\r ')
+            if [ "$v" = "release" ]; then BT=release; fi
+            if [ "$v" = "aab" ]; then BT=aab; fi
+          fi
+          echo "BUILD_TYPE=$BT" >> "$GITHUB_ENV"
+          if [ -f .github/nh-build.env ]; then
+            grep -E '^ENV_' .github/nh-build.env | tr -d '\r' | sed 's/^ENV_//' >> "$GITHUB_ENV" || true
+          fi
+          echo "Build type: $BT"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Build APK
+        run: |
+          if [ "$BUILD_TYPE" = "aab" ]; then TASK=bundleRelease; elif [ "$BUILD_TYPE" = "release" ]; then TASK=assembleRelease; else TASK=assembleDebug; fi
+          if [ -f ./gradlew ] && [ -f ./gradle/wrapper/gradle-wrapper.jar ]; then
+            chmod +x ./gradlew
+            ./gradlew "$TASK" --stacktrace
+          else
+            gradle "$TASK" --stacktrace
+          fi
+
+      - name: Collect APKs
+        run: |
+          mkdir -p dist
+          if [ "$BUILD_TYPE" = "aab" ]; then
+            find . -path "*/build/outputs/bundle/release/*" -name "*.aab" -exec cp {} dist/ \;
+          elif [ "$BUILD_TYPE" = "release" ]; then
+            find . -path "*/build/outputs/apk/release/*" -name "*.apk" -exec cp {} dist/ \;
+          else
+            find . -path "*/build/outputs/apk/*" -name "*.apk" -exec cp {} dist/ \;
+          fi
+          ls -la dist
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-${{ github.run_number }}
+          path: |
+            dist/*.apk
+            dist/*.aab
+          if-no-files-found: error
+
+      - name: Publish release (direct APK download)
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          name: Build ${{ github.run_number }}
+          prerelease: true
+          files: |
+            dist/*.apk
+            dist/*.aab
